@@ -1,0 +1,33 @@
+model:
+  lmax: 1
+  vecnorm_type: rms
+  trainable_vecnorm: False
+  num_heads: 4
+  hidden_channels: 160
+  num_rbf: 25
+  rbf_type: gauss
+  trainable_rbf: False
+  activation: silu
+  attn_activation: silu
+  max_z: 83
+  cutoff: 5.0
+  num_layers: 3
+  max_num_neighbors: 100
+  load_model: False
+  model_path: visnet_logs/model.ckpt
+  transfer_learn: False
+data:
+  device: cpu
+  data_dir: GWSet
+  num_train: 120000
+  num_val: 12000
+  batch_size: 128
+training:
+  dataset: gwset
+  log_dir: visnet_logs
+  num_epochs: 50
+  num_warmup_epochs: 25
+  lr_start: 0.000001
+  lr_max: 0.0001
+  eta_min: 0.0
+  weight_decay: 0.0001
