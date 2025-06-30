@@ -10,6 +10,8 @@ from model.visnet import create_model
 from data.gwset import GWSet
 from data.omol25 import OMol25
 from torch.utils.data import DataLoader
+from math import ceil
+from tqdm import tqdm
 
 
 
@@ -103,13 +105,15 @@ def main():
         print("epoch,train_mse,train_mae,val_mse,val_mae,lr", file=f)
 
     min_val_mae = 1000000
+    num_train_batches = ceil(cfg.data.num_train / cfg.data.batch_size)
+    num_val_batches = ceil(cfg.data.num_val / cfg.data.batch_size)
     for epoch in range(cfg.training.num_epochs):
         train_mse = 0
         train_mae = 0
         val_mse = 0
         val_mae = 0
         model.train()
-        for i, (data, E) in enumerate(train_dataloader):
+        for i, (data, E) in tqdm(enumerate(train_dataloader), total=num_train_batches, leave=False):
             data["z"] = data["z"].to(torch.device(cfg.training.device))
             data["pos"] = data["pos"].to(torch.device(cfg.training.device))
             data["batch"] = data["batch"].to(torch.device(cfg.training.device))
@@ -125,7 +129,7 @@ def main():
             optimizer.step()
         with torch.no_grad():
             model.eval()
-            for i, (data, E) in enumerate(val_dataloader):
+            for i, (data, E) in tqdm(enumerate(val_dataloader), total=num_val_batches, leave=False):
                 data["z"] = data["z"].to(torch.device(cfg.training.device))
                 data["pos"] = data["pos"].to(torch.device(cfg.training.device))
                 data["batch"] = data["batch"].to(torch.device(cfg.training.device))

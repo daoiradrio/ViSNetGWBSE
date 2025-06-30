@@ -18,8 +18,8 @@ model:
   transfer_learn: False
 data:
   dataset: gwset
-  num_train: 100
-  num_val: 100
+  num_train: 120000
+  num_val: 12000
 training:
   device: cpu
   log_dir: visnet_logs
