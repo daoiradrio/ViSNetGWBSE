@@ -105,8 +105,8 @@ def main():
         print("epoch,train_mse,train_mae,val_mse,val_mae,lr", file=f)
 
     min_val_mae = 1000000
-    num_train_batches = ceil(cfg.data.num_train / cfg.data.batch_size)
-    num_val_batches = ceil(cfg.data.num_val / cfg.data.batch_size)
+    num_train_batches = ceil(cfg.data.num_train / cfg.training.batch_size)
+    num_val_batches = ceil(cfg.data.num_val / cfg.training.batch_size)
     for epoch in range(cfg.training.num_epochs):
         train_mse = 0
         train_mae = 0
