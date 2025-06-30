@@ -20,9 +20,9 @@ torch.manual_seed(42)
 def main():
     cfg = OmegaConf.load(os.path.join(os.getcwd(), "config.yaml"))
 
-    if cfg.training.dataset == "gwset":
+    if cfg.data.dataset == "gwset":
         data_module = GWSet(**cfg.data)
-    elif cfg.training.dataset == "omol25":
+    elif cfg.data.dataset == "omol25":
         data_module = OMol25(**cfg.data)
     else:
         print("Invalid dataset.")
@@ -30,20 +30,20 @@ def main():
 
     train_dataloader = DataLoader(
         data_module.train_dataset,
-        batch_size=cfg.data.batch_size,
+        batch_size=cfg.training.batch_size,
         shuffle=True,
-        num_workers=4 if cfg.data.device == "cuda" else 0,
-        persistent_workers=True if cfg.data.device == "cuda" else False,
-        pin_memory=True if cfg.data.device == "cuda" else False,
+        num_workers=4 if cfg.training.device == "cuda" else 0,
+        persistent_workers=True if cfg.training.device == "cuda" else False,
+        pin_memory=True if cfg.training.device == "cuda" else False,
         collate_fn=data_module.collate_fn
     )
     val_dataloader = DataLoader(
         data_module.val_dataset,
-        batch_size=cfg.data.batch_size,
+        batch_size=cfg.training.batch_size,
         shuffle=False,
-        num_workers=4 if cfg.data.device == "cuda" else 0,
-        persistent_workers=True if cfg.data.device == "cuda" else False,
-        pin_memory=True if cfg.data.device == "cuda" else False,
+        num_workers=4 if cfg.training.device == "cuda" else 0,
+        persistent_workers=True if cfg.training.device == "cuda" else False,
+        pin_memory=True if cfg.training.device == "cuda" else False,
         collate_fn=data_module.collate_fn
     )
 
@@ -53,8 +53,18 @@ def main():
         model.load_state_dict(state_dict)
     if cfg.model.transfer_learn:
         model.representation_model.requires_grad_(False)
+    '''
+    n = 0
+    for param in model.parameters():
+        if param.dtype == torch.float32 and param.requires_grad:
+            n += param.numel()
+    print(n)
+    print(n * 4 / 1000000)
+    return
+    '''
+
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    model.to(torch.device(cfg.data.device))
+    model.to(torch.device(cfg.training.device))
 
     print()
     print(f"Number of trainable parameters: {num_params}")
@@ -100,10 +110,10 @@ def main():
         val_mae = 0
         model.train()
         for i, (data, E) in enumerate(train_dataloader):
-            data["z"] = data["z"].to(torch.device(cfg.data.device))
-            data["pos"] = data["pos"].to(torch.device(cfg.data.device))
-            data["batch"] = data["batch"].to(torch.device(cfg.data.device))
-            E = E.to(torch.device(cfg.data.device))
+            data["z"] = data["z"].to(torch.device(cfg.training.device))
+            data["pos"] = data["pos"].to(torch.device(cfg.training.device))
+            data["batch"] = data["batch"].to(torch.device(cfg.training.device))
+            E = E.to(torch.device(cfg.training.device))
             optimizer.zero_grad()
             E_pred, _ = model(data)
             mae = mae_fn(E_pred, E)
@@ -116,10 +126,10 @@ def main():
         with torch.no_grad():
             model.eval()
             for i, (data, E) in enumerate(val_dataloader):
-                data["z"] = data["z"].to(torch.device(cfg.data.device))
-                data["pos"] = data["pos"].to(torch.device(cfg.data.device))
-                data["batch"] = data["batch"].to(torch.device(cfg.data.device))
-                E = E.to(torch.device(cfg.data.device))
+                data["z"] = data["z"].to(torch.device(cfg.training.device))
+                data["pos"] = data["pos"].to(torch.device(cfg.training.device))
+                data["batch"] = data["batch"].to(torch.device(cfg.training.device))
+                E = E.to(torch.device(cfg.training.device))
                 E_pred, _ = model(data)
                 mae = mae_fn(E_pred, E)
                 mse = mse_fn(E_pred, E)

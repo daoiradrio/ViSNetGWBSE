@@ -1,6 +1,6 @@
 model:
   lmax: 1
-  vecnorm_type: rms
+  vecnorm_type: None
   trainable_vecnorm: False
   num_heads: 4
   hidden_channels: 160
@@ -17,14 +17,13 @@ model:
   model_path: visnet_logs/model.ckpt
   transfer_learn: False
 data:
-  device: cpu
-  data_dir: GWSet
-  num_train: 120000
-  num_val: 12000
-  batch_size: 128
-training:
   dataset: gwset
+  num_train: 100
+  num_val: 100
+training:
+  device: cpu
   log_dir: visnet_logs
+  batch_size: 128
   num_epochs: 50
   num_warmup_epochs: 25
   lr_start: 0.000001
