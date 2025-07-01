@@ -5,11 +5,13 @@ import os
 import torch
 import shutil
 
+import torch.distributed as dist
+
 from omegaconf import OmegaConf
 from model.visnet import create_model
 from data.gwset import GWSet
 from data.omol25 import OMol25
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, DistributedSampler
 from math import ceil
 from tqdm import tqdm
 
@@ -19,7 +21,19 @@ torch.manual_seed(42)
 
 
 
+def ddp_setup():
+    dist.init_process_group(backend="gloo")
+    rank = dist.get_rank()
+    world_size = dist.get_world_size()
+    torch.manual_seed(42 + rank)
+    return rank, world_size
+
+
+
 def main():
+
+    rank, world_size = ddp_setup()
+
     cfg = OmegaConf.load(os.path.join(os.getcwd(), "config.yaml"))
 
     if cfg.data.dataset == "gwset":
@@ -27,26 +41,40 @@ def main():
     elif cfg.data.dataset == "omol25":
         data_module = OMol25(**cfg.data)
     else:
-        print("Invalid dataset.")
+        if rank == 0:
+            print("Invalid dataset.")
+        dist.destroy_process_group()
         return
 
     train_dataloader = DataLoader(
         data_module.train_dataset,
         batch_size=cfg.training.batch_size,
         shuffle=True,
-        num_workers=4 if cfg.training.device == "cuda" else 0,
-        persistent_workers=True if cfg.training.device == "cuda" else False,
-        pin_memory=True if cfg.training.device == "cuda" else False,
-        collate_fn=data_module.collate_fn
+        num_workers=0,
+        persistent_workers=False,
+        pin_memory=False,
+        collate_fn=data_module.collate_fn,
+        sampler=DistributedSampler(
+            dataset=data_module.train_dataset,
+            num_replicas=world_size,
+            rank=rank,
+            shuffle=True
+        )
     )
     val_dataloader = DataLoader(
         data_module.val_dataset,
         batch_size=cfg.training.batch_size,
         shuffle=False,
-        num_workers=4 if cfg.training.device == "cuda" else 0,
-        persistent_workers=True if cfg.training.device == "cuda" else False,
-        pin_memory=True if cfg.training.device == "cuda" else False,
-        collate_fn=data_module.collate_fn
+        num_workers=0,
+        persistent_workers=False,
+        pin_memory=False,
+        collate_fn=data_module.collate_fn,
+        sampler=DistributedSampler(
+            dataset=data_module.val_dataset,
+            num_replicas=world_size,
+            rank=rank,
+            shuffle=False
+        )
     )
 
     model = create_model(cfg)
@@ -55,22 +83,13 @@ def main():
         model.load_state_dict(state_dict)
     if cfg.model.transfer_learn:
         model.representation_model.requires_grad_(False)
-    '''
-    n = 0
-    for param in model.parameters():
-        if param.dtype == torch.float32 and param.requires_grad:
-            n += param.numel()
-    print(n)
-    print(n * 4 / 1000000)
-    return
-    '''
-
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    model.to(torch.device(cfg.training.device))
+    model = torch.nn.parallel.DistributedDataParallel(model)
 
-    print()
-    print(f"Number of trainable parameters: {num_params}")
-    print()
+    if rank == 0:
+        print()
+        print(f"Number of trainable parameters: {num_params}")
+        print()
 
     optimizer = torch.optim.AdamW(
         model.parameters(),
@@ -92,9 +111,10 @@ def main():
     mse_fn = torch.nn.MSELoss()
     mae_fn = torch.nn.L1Loss()
 
-    chkpt_dir = os.path.join(os.getcwd(), cfg.training.log_dir)
-    if not os.path.exists(chkpt_dir):
-        os.makedirs(chkpt_dir)
+    if rank == 0:
+        chkpt_dir = os.path.join(os.getcwd(), cfg.training.log_dir)
+        if not os.path.exists(chkpt_dir):
+            os.makedirs(chkpt_dir)
     
     shutil.copyfile(
         src=os.path.join(os.getcwd(), "config.yaml"),
@@ -114,10 +134,6 @@ def main():
         val_mae = 0
         model.train()
         for i, (data, E) in tqdm(enumerate(train_dataloader), total=num_train_batches, leave=False):
-            data["z"] = data["z"].to(torch.device(cfg.training.device))
-            data["pos"] = data["pos"].to(torch.device(cfg.training.device))
-            data["batch"] = data["batch"].to(torch.device(cfg.training.device))
-            E = E.to(torch.device(cfg.training.device))
             optimizer.zero_grad()
             E_pred, _ = model(data)
             mae = mae_fn(E_pred, E)
@@ -130,10 +146,6 @@ def main():
         with torch.no_grad():
             model.eval()
             for i, (data, E) in tqdm(enumerate(val_dataloader), total=num_val_batches, leave=False):
-                data["z"] = data["z"].to(torch.device(cfg.training.device))
-                data["pos"] = data["pos"].to(torch.device(cfg.training.device))
-                data["batch"] = data["batch"].to(torch.device(cfg.training.device))
-                E = E.to(torch.device(cfg.training.device))
                 E_pred, _ = model(data)
                 mae = mae_fn(E_pred, E)
                 mse = mse_fn(E_pred, E)
