@@ -111,11 +111,10 @@ def main():
     if rank == 0:
         if not os.path.exists(chkpt_dir):
             os.makedirs(chkpt_dir)
-    
-    shutil.copyfile(
-        src=os.path.join(os.getcwd(), "config.yaml"),
-        dst=os.path.join(os.getcwd(), chkpt_dir, "config.yaml")
-    )
+        shutil.copyfile(
+            src=os.path.join(os.getcwd(), "config.yaml"),
+            dst=os.path.join(chkpt_dir, "config.yaml")
+        )
 
     with open(os.path.join(chkpt_dir, "metrics.csv"), "w") as f:
         print("epoch,train_mse,train_mae,val_mse,val_mae,lr", file=f)
