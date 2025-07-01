@@ -107,8 +107,8 @@ def main():
     mse_fn = torch.nn.MSELoss()
     mae_fn = torch.nn.L1Loss()
 
+    chkpt_dir = os.path.join(os.getcwd(), cfg.training.log_dir)
     if rank == 0:
-        chkpt_dir = os.path.join(os.getcwd(), cfg.training.log_dir)
         if not os.path.exists(chkpt_dir):
             os.makedirs(chkpt_dir)
     
