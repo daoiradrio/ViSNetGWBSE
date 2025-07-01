@@ -49,9 +49,7 @@ def main():
     train_dataloader = DataLoader(
         data_module.train_dataset,
         batch_size=cfg.training.batch_size,
-        shuffle=True,
         num_workers=0,
-        persistent_workers=False,
         pin_memory=False,
         collate_fn=data_module.collate_fn,
         sampler=DistributedSampler(
@@ -64,9 +62,7 @@ def main():
     val_dataloader = DataLoader(
         data_module.val_dataset,
         batch_size=cfg.training.batch_size,
-        shuffle=False,
         num_workers=0,
-        persistent_workers=False,
         pin_memory=False,
         collate_fn=data_module.collate_fn,
         sampler=DistributedSampler(
