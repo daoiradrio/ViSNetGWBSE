@@ -114,7 +114,7 @@ def main():
     
     shutil.copyfile(
         src=os.path.join(os.getcwd(), "config.yaml"),
-        dst=os.path.join(os.getcwd(), cfg.training.log_dir, "config.yaml")
+        dst=os.path.join(os.getcwd(), chkpt_dir, "config.yaml")
     )
 
     with open(os.path.join(chkpt_dir, "metrics.csv"), "w") as f:
