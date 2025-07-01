@@ -115,9 +115,8 @@ def main():
             src=os.path.join(os.getcwd(), "config.yaml"),
             dst=os.path.join(chkpt_dir, "config.yaml")
         )
-
-    with open(os.path.join(chkpt_dir, "metrics.csv"), "w") as f:
-        print("epoch,train_mse,train_mae,val_mse,val_mae,lr", file=f)
+        with open(os.path.join(chkpt_dir, "metrics.csv"), "w") as f:
+            print("epoch,train_mse,train_mae,val_mse,val_mae,lr", file=f)
 
     min_val_mae = 1000000
     num_train_batches = ceil(cfg.data.num_train / cfg.training.batch_size)
