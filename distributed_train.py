@@ -155,14 +155,17 @@ def main():
             lr_warmup.step()
         else:
             lr_decay.step()
-        if val_mae < min_val_mae:
-            torch.save(model.state_dict(), os.path.join(chkpt_dir, "model.ckpt"))
-            min_val_mae = val_mae
-        if (epoch + 1) % 5 == 0:
-            torch.save(model.state_dict(), os.path.join(chkpt_dir, f"model_{epoch + 1}_epochs.ckpt"))
-        print(f"Epoch {epoch + 1:3d}: {train_mse:10.5f} {train_mae:10.5f} {val_mse:10.5f} {val_mae:10.5f} {optimizer.param_groups[0]['lr']:15.8f}")
-        with open(os.path.join(chkpt_dir, "metrics.csv"), "a") as f:
-            print(f"{epoch+1},{train_mse:.8f},{train_mae:.8f},{val_mse:.8f},{val_mae:.8f},{optimizer.param_groups[0]['lr']:.8f}", file=f)
+        if rank == 0:
+            if val_mae < min_val_mae:
+                torch.save(model.state_dict(), os.path.join(chkpt_dir, "model.ckpt"))
+                min_val_mae = val_mae
+            if (epoch + 1) % 5 == 0:
+                torch.save(model.state_dict(), os.path.join(chkpt_dir, f"model_{epoch + 1}_epochs.ckpt"))
+            print(f"Epoch {epoch + 1:3d}: {train_mse:10.5f} {train_mae:10.5f} {val_mse:10.5f} {val_mae:10.5f} {optimizer.param_groups[0]['lr']:15.8f}")
+            with open(os.path.join(chkpt_dir, "metrics.csv"), "a") as f:
+                print(f"{epoch+1},{train_mse:.8f},{train_mae:.8f},{val_mse:.8f},{val_mae:.8f},{optimizer.param_groups[0]['lr']:.8f}", file=f)
+    
+    dist.destroy_process_group()
 
 
 
