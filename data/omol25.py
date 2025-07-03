@@ -22,7 +22,7 @@ class OMol25Dataset(Dataset):
     def __init__(self, split_set):
         super().__init__()
         self.split_set = split_set
-        self.num_data = int(np.loadtxt(f"{self.data_dir}/{self.split_set}/num_data.dat"))
+        self.num_data = int(np.loadtxt(f"OMol25/{self.split_set}/num_data.dat"))
         self.Z = np.memmap(f"OMol25/{self.split_set}/Z.npy", dtype="int32", mode="r", shape=(self.num_data, N_MAX))
         self.R = np.memmap(f"OMol25/{self.split_set}/R.npy", dtype="float32", mode="r", shape=(self.num_data, N_MAX, 3))
         self.M = np.memmap(f"OMol25/{self.split_set}/M.npy", dtype="bool", mode="r", shape=(self.num_data, N_MAX))
