@@ -1,5 +1,5 @@
 import multiprocessing
-multiprocessing.set_start_method("fork")
+multiprocessing.set_start_method("spawn")
 
 import os
 import torch
@@ -31,7 +31,6 @@ def ddp_setup():
 
 
 def main():
-
     rank, world_size = ddp_setup()
 
     cfg = OmegaConf.load(os.path.join(os.getcwd(), "config.yaml"))

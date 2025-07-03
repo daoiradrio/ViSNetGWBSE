@@ -55,15 +55,6 @@ def main():
         model.load_state_dict(state_dict)
     if cfg.model.transfer_learn:
         model.representation_model.requires_grad_(False)
-    '''
-    n = 0
-    for param in model.parameters():
-        if param.dtype == torch.float32 and param.requires_grad:
-            n += param.numel()
-    print(n)
-    print(n * 4 / 1000000)
-    return
-    '''
 
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     model.to(torch.device(cfg.training.device))
