@@ -48,8 +48,8 @@ class OMol25Dataset(Dataset):
         Z = self.Z[i, :]
         R = self.R[i, :, :]
         M = self.M[i, :]
-        N = [self.N[i]]
-        E = [self.E[i]]
+        N = self.N[i]
+        E = self.E[i]
 
         Z = Z[M]
         R = R[M, :]
