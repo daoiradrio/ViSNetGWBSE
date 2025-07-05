@@ -18,6 +18,7 @@ model:
   transfer_learn: False
 data:
   dataset: gwset
+  data_path: None 
   num_train: 100
   num_val: 100
 training:

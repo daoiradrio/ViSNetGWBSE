@@ -135,7 +135,7 @@ def main():
         else:
             lr_decay.step()
         if val_mae < min_val_mae:
-            torch.save(model.state_dict(), os.path.join(chkpt_dir, "best_model.ckpt"))
+            torch.save(model.state_dict(), os.path.join(chkpt_dir, f"best_model_epoch_{epoch + 1}.ckpt"))
             min_val_mae = val_mae
         if (epoch + 1) % 5 == 0:
             torch.save(model.state_dict(), os.path.join(chkpt_dir, f"model_{epoch + 1}_epochs.ckpt"))

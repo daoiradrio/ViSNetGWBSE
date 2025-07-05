@@ -19,15 +19,15 @@ N_MAX = 185
 
 class OMol25Dataset(Dataset):
 
-    def __init__(self, split_set, num_samples):
+    def __init__(self, data_path, split_set, num_samples):
         super().__init__()
         self.num_samples = num_samples
-        num_data = int(np.loadtxt(f"OMol25/{split_set}/num_data.dat"))
-        N_memmap = np.memmap(f"OMol25/{split_set}/N.npy", dtype="int32", mode="r", shape=(num_data,))
-        Z_memmap = np.memmap(f"OMol25/{split_set}/Z.npy", dtype="int32", mode="r", shape=(num_data, N_MAX))
-        R_memmap = np.memmap(f"OMol25/{split_set}/R.npy", dtype="float32", mode="r", shape=(num_data, N_MAX, 3))
-        M_memmap = np.memmap(f"OMol25/{split_set}/M.npy", dtype="bool", mode="r", shape=(num_data, N_MAX))
-        E_memmap = np.memmap(f"OMol25/{split_set}/HOMO.npy", dtype="float32", mode="r", shape=(num_data,))
+        num_data = int(np.loadtxt(f"{data_path}/{split_set}/num_data.dat"))
+        N_memmap = np.memmap(f"{data_path}/{split_set}/N.npy", dtype="int32", mode="r", shape=(num_data,))
+        Z_memmap = np.memmap(f"{data_path}/{split_set}/Z.npy", dtype="int32", mode="r", shape=(num_data, N_MAX))
+        R_memmap = np.memmap(f"{data_path}/{split_set}/R.npy", dtype="float32", mode="r", shape=(num_data, N_MAX, 3))
+        M_memmap = np.memmap(f"{data_path}/{split_set}/M.npy", dtype="bool", mode="r", shape=(num_data, N_MAX))
+        E_memmap = np.memmap(f"{data_path}/{split_set}/HOMO.npy", dtype="float32", mode="r", shape=(num_data,))
         self.N = torch.from_numpy(np.asarray(N_memmap).copy())
         self.Z = torch.from_numpy(np.asarray(Z_memmap).copy())
         self.R = torch.from_numpy(np.asarray(R_memmap).copy())
@@ -60,10 +60,10 @@ class OMol25Dataset(Dataset):
 
 class OMol25(torch.nn.Module):
 
-    def __init__(self, num_train, num_val, dataset):
+    def __init__(self, num_train, num_val, dataset, data_path):
         super().__init__()
-        self.train_dataset = OMol25Dataset(split_set="train", num_samples=num_train)
-        self.val_dataset = OMol25Dataset(split_set="val", num_samples=num_val)
+        self.train_dataset = OMol25Dataset(data_path=data_path, split_set="train", num_samples=num_train)
+        self.val_dataset = OMol25Dataset(data_path=data_path, split_set="val", num_samples=num_val)
 
 
     def collate_fn(self, batch):

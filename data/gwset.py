@@ -58,18 +58,19 @@ class GWSet(torch.nn.Module):
         self,
         num_train,
         num_val,
-        dataset
+        dataset,
+        data_path
     ):
         super().__init__()
+        self.data_path = data_path
         if not os.path.exists(os.path.join(os.getcwd(), "GWSet")):
             self._prepare_data(num_train, num_val)
         self._read_data()
 
 
     def _read_data(self):
-        data_path = os.path.join(os.getcwd(), "GWSet")
-        train_path = os.path.join(data_path, "train")
-        val_path = os.path.join(data_path, "val")
+        train_path = os.path.join(self.data_path, "train")
+        val_path = os.path.join(self.data_path, "val")
         
         N_train = torch.load(os.path.join(train_path, "N.pt"))
         Z_train = torch.load(os.path.join(train_path, "Z.pt"))
@@ -91,7 +92,6 @@ class GWSet(torch.nn.Module):
         results_path = "/Users/dario/datasets/GWSet/results"
         eqp_path = f"{results_path}/E_qp"
         homo_path = f"{results_path}/homo_idx"
-        data_path = os.path.join(os.getcwd(), "GWSet")
 
         #idx = [i for i in range(1, QM9_SIZE + 1)]
         idx = []
@@ -118,9 +118,9 @@ class GWSet(torch.nn.Module):
         all_R = []
         all_M = []
         all_E = []
-        train_path = os.path.join(data_path, "train")
+        train_path = os.path.join(self.data_path, "train")
         print("Preparing training data...")
-        os.makedirs(os.path.join(data_path, "train"))
+        os.makedirs(os.path.join(self.data_path, "train"))
         for i in tqdm(train_idx, leave=False):
             mol = f"mol_{i}"
             atoms = read(f"{xyz_path}/{mol}.xyz", format="xyz")
@@ -159,9 +159,9 @@ class GWSet(torch.nn.Module):
         all_R = []
         all_M = []
         all_E = []
-        val_path = os.path.join(data_path, "val")
+        val_path = os.path.join(self.data_path, "val")
         print("Preparing validation data...")
-        os.makedirs(os.path.join(data_path, "val"))
+        os.makedirs(os.path.join(self.data_path, "val"))
         for i in tqdm(val_idx, leave=False):
             mol = f"mol_{i}"
             atoms = read(f"{xyz_path}/{mol}.xyz", format="xyz")
