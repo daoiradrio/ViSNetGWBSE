@@ -6,9 +6,9 @@ import torch
 import shutil
 
 from omegaconf import OmegaConf
-from model.visnet import create_model
-from data.gwset import GWSet
-from data.omol25 import OMol25
+from ViSNetGW.model.visnet import create_model
+from ViSNetGW.data.gwset import GWSet
+from ViSNetGW.data.omol25 import OMol25
 from torch.utils.data import DataLoader
 from math import ceil
 from tqdm import tqdm
