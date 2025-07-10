@@ -3,7 +3,7 @@ model:
   vecnorm_type: None
   trainable_vecnorm: False
   num_heads: 4
-  hidden_channels: 220
+  hidden_channels: 32
   num_rbf: 25
   rbf_type: gauss
   trainable_rbf: False
@@ -18,8 +18,8 @@ model:
   transfer_learn: False
 data:
   dataset: gwset
-  data_path: None 
-  num_train: 100
+  data_path: GWSet 
+  num_train: 1000
   num_val: 100
 training:
   device: cpu
@@ -28,6 +28,6 @@ training:
   num_epochs: 50
   num_warmup_epochs: 5
   lr_start: 0.000001
-  lr_max: 0.0001
-  eta_min: 0.000001
+  lr_max: 0.0005
+  eta_min: 0.00001
   weight_decay: 0.001

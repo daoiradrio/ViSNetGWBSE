@@ -63,7 +63,7 @@ class GWSet(torch.nn.Module):
     ):
         super().__init__()
         self.data_path = data_path
-        if not os.path.exists(os.path.join(os.getcwd(), "GWSet")):
+        if not os.path.exists(os.path.join(os.getcwd(), data_path)):
             self._prepare_data(num_train, num_val)
         self._read_data()
 
