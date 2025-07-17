@@ -79,6 +79,15 @@ def main():
         T_0=10,
         eta_min=cfg.training.eta_min
     )
+    '''
+    lr_decay = torch.optim.lr_scheduler.MultiplicativeLR(
+        optimizer=optimizer,
+        lr_lambda=lambda epoch: 0.5
+    )
+    lr_scheduler = torch.optim.lr_scheduler.ChainedScheduler(
+        schedulers=[lr_warm_cos, lr_decay]
+    )
+    '''
 
     mse_fn = torch.nn.MSELoss()
     mae_fn = torch.nn.L1Loss()
