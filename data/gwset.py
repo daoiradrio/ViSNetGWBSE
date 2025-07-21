@@ -25,8 +25,9 @@ QM9_N_MAX = 29
 
 class GWSetDataset(Dataset):
 
-    def __init__(self, N, Z, R, M, E):
-        super().__init__()  
+    def __init__(self, num_samples, N, Z, R, M, E):
+        super().__init__()
+        self.num_samples = num_samples
         self.N = N
         self.Z = Z
         self.R = R
@@ -35,7 +36,7 @@ class GWSetDataset(Dataset):
         
 
     def __len__(self):
-        return self.N.size(0)
+        return self.num_samples
 
 
     def __getitem__(self, i):
@@ -65,10 +66,10 @@ class GWSet(torch.nn.Module):
         self.data_path = data_path
         if not os.path.exists(os.path.join(os.getcwd(), data_path)):
             self._prepare_data(num_train, num_val)
-        self._read_data()
+        self._read_data(num_train, num_val)
 
 
-    def _read_data(self):
+    def _read_data(self, num_train, num_val):
         train_path = os.path.join(self.data_path, "train")
         val_path = os.path.join(self.data_path, "val")
         
@@ -83,8 +84,8 @@ class GWSet(torch.nn.Module):
         M_val = torch.load(os.path.join(val_path, "M.pt"))
         E_val = torch.load(os.path.join(val_path, "E.pt"))
 
-        self.train_dataset = GWSetDataset(N_train, Z_train, R_train, M_train, E_train)
-        self.val_dataset = GWSetDataset(N_val, Z_val, R_val, M_val, E_val)
+        self.train_dataset = GWSetDataset(num_train, N_train, Z_train, R_train, M_train, E_train)
+        self.val_dataset = GWSetDataset(num_val, N_val, Z_val, R_val, M_val, E_val)
 
 
     def _prepare_data(self, num_train, num_val):
