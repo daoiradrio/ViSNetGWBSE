@@ -19,8 +19,8 @@ model:
 data:
   dataset: gwset
   data_path: GWSet 
-  num_train: 1000
-  num_val: 100
+  num_train: 117000
+  num_val: 10000
 training:
   device: cpu
   log_dir: visnet_logs

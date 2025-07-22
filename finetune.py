@@ -138,6 +138,8 @@ def main():
                 val_mse += (mse - val_mse) / (i + 1)
                 val_mae += (mae - val_mae) / (i + 1)
         lr_scheduler.step()
+        if epoch > cfg.training.num_warmup_epochs:
+            swa_model.update_parameters(model)
         if val_mae < min_val_mae:
             torch.save(model.state_dict(), os.path.join(chkpt_dir, f"best_model.ckpt"))
             min_val_mae = val_mae
