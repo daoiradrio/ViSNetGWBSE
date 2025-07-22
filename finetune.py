@@ -55,8 +55,9 @@ def main():
         model.load_state_dict(state_dict)
     if cfg.model.transfer_learn:
         model.representation_model.requires_grad_(False)
-
+    
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    swa_model = torch.optim.swa_utils.AveragedModel(model)
     model.to(torch.device(cfg.training.device))
 
     print()
@@ -70,25 +71,21 @@ def main():
         weight_decay=cfg.training.weight_decay
     )
     
-    #lr_warmup = torch.optim.lr_scheduler.LinearLR(
-    #    optimizer,
-    #    start_factor=cfg.training.lr_start/cfg.training.lr_max,
-    #    total_iters=cfg.training.num_warmup_epochs
-    #)
+    lr_warmup = torch.optim.lr_scheduler.LinearLR(
+        optimizer,
+        start_factor=cfg.training.lr_start/cfg.training.lr_max,
+        total_iters=cfg.training.num_warmup_epochs
+    )
     lr_warm_cos = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer=optimizer,
-        T_0=10,
+        T_0=5,
         eta_min=cfg.training.eta_min
     )
-    '''
-    lr_decay = torch.optim.lr_scheduler.MultiplicativeLR(
+    lr_scheduler = torch.optim.lr_scheduler.SequentialLR(
         optimizer=optimizer,
-        lr_lambda=lambda epoch: 0.5
+        schedulers=[lr_warmup, lr_warm_cos],
+        milestones=[cfg.training.num_warmup_epochs]
     )
-    lr_scheduler = torch.optim.lr_scheduler.ChainedScheduler(
-        schedulers=[lr_warm_cos, lr_decay]
-    )
-    '''
 
     mse_fn = torch.nn.MSELoss()
     mae_fn = torch.nn.L1Loss()
@@ -140,11 +137,7 @@ def main():
                 mse = mse_fn(E_pred, E)
                 val_mse += (mse - val_mse) / (i + 1)
                 val_mae += (mae - val_mae) / (i + 1)
-        #if epoch < cfg.training.num_warmup_epochs:
-        #    lr_warmup.step()
-        #else:
-        #    lr_decay.step()
-        lr_warm_cos.step()
+        lr_scheduler.step()
         if val_mae < min_val_mae:
             torch.save(model.state_dict(), os.path.join(chkpt_dir, f"best_model.ckpt"))
             min_val_mae = val_mae

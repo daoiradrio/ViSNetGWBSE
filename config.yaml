@@ -24,8 +24,8 @@ data:
 training:
   device: cpu
   log_dir: visnet_logs
-  batch_size: 128
-  num_epochs: 50
+  batch_size: 64
+  num_epochs: 55
   num_warmup_epochs: 5
   lr_start: 0.00001
   lr_max: 0.0003
