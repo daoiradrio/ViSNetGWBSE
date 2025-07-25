@@ -19,9 +19,9 @@ model:
 data:
   dataset: gwset
   data_path: GWSet
-  target: GAP 
-  num_train: 117000
-  num_val: 10000
+  target: HOMO 
+  num_train: 10000
+  num_val: 1000
 training:
   device: cpu
   log_dir: visnet_logs

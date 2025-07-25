@@ -66,7 +66,7 @@ class GWSet(torch.nn.Module):
         super().__init__()
         if not os.path.exists(os.path.join(os.getcwd(), data_path)):
             self._prepare_data(data_path, target, num_train, num_val)
-        self._read_data(num_train, num_val)
+        self._read_data(data_path, target, num_train, num_val)
 
 
     def _read_data(self, data_path, target, num_train, num_val):
@@ -136,7 +136,11 @@ class GWSet(torch.nn.Module):
                 pad=(0, 0, 0, QM9_N_MAX - N)
             )
             M = torch.where(Z > 0, True, False)
-            E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+            if target == "HOMO":
+                E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+            elif target == "GAP":
+                eqp = np.loadtxt(f"{eqp_path}/{mol}.dat")
+                E = torch.tensor([eqp[homo_idx+1] - eqp[homo_idx]])
             all_N.append(N)
             all_Z.append(Z)
             all_R.append(R)
