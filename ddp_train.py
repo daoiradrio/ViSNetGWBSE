@@ -5,26 +5,23 @@ import os
 import torch
 import shutil
 
-import torch.distributed as dist
-
 from omegaconf import OmegaConf
-from model.visnet import create_model
-from data.gwset import GWSet
-from data.omol25 import OMol25
+from ViSNetGW.model.visnet import create_model
+from ViSNetGW.data.gwset import GWSet
+from ViSNetGW.data.omol25 import OMol25
 from torch.utils.data import DataLoader, DistributedSampler
 from math import ceil
 from tqdm import tqdm
+from torch.distributed import init_process_group, get_rank, get_world_size, destroy_process_group
 
-
-
-torch.manual_seed(42)
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 
 
 def ddp_setup():
-    dist.init_process_group(backend="gloo")
-    rank = dist.get_rank()
-    world_size = dist.get_world_size()
+    init_process_group(backend="gloo")
+    rank = get_rank()
+    world_size = get_world_size()
     torch.manual_seed(42 + rank)
     return rank, world_size
 
@@ -42,7 +39,7 @@ def main():
     else:
         if rank == 0:
             print("Invalid dataset.")
-        dist.destroy_process_group()
+        destroy_process_group()
         return
 
     train_dataloader = DataLoader(
@@ -79,7 +76,7 @@ def main():
     if cfg.model.transfer_learn:
         model.representation_model.requires_grad_(False)
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    model = torch.nn.parallel.DistributedDataParallel(model)
+    model = DDP(model, device_ids=[rank])
 
     if rank == 0:
         print()
@@ -126,6 +123,7 @@ def main():
         val_mse = 0
         val_mae = 0
         model.train()
+        train_dataloader.sampler.set_epoch(epoch)
         for i, (data, E) in tqdm(enumerate(train_dataloader), total=num_train_batches, leave=False):
             optimizer.zero_grad()
             E_pred, _ = model(data)
@@ -158,7 +156,7 @@ def main():
             with open(os.path.join(chkpt_dir, "metrics.csv"), "a") as f:
                 print(f"{epoch+1},{train_mse:.8f},{train_mae:.8f},{val_mse:.8f},{val_mae:.8f},{optimizer.param_groups[0]['lr']:.8f}", file=f)
     
-    dist.destroy_process_group()
+    destroy_process_group()
 
 
 

@@ -60,35 +60,35 @@ class GWSet(torch.nn.Module):
         num_train,
         num_val,
         dataset,
-        data_path
+        data_path,
+        target
     ):
         super().__init__()
-        self.data_path = data_path
         if not os.path.exists(os.path.join(os.getcwd(), data_path)):
-            self._prepare_data(num_train, num_val)
+            self._prepare_data(data_path, target, num_train, num_val)
         self._read_data(num_train, num_val)
 
 
-    def _read_data(self, num_train, num_val):
-        train_path = os.path.join(self.data_path, "train")
-        val_path = os.path.join(self.data_path, "val")
+    def _read_data(self, data_path, target, num_train, num_val):
+        train_path = os.path.join(data_path, "train")
+        val_path = os.path.join(data_path, "val")
         
         N_train = torch.load(os.path.join(train_path, "N.pt"))
         Z_train = torch.load(os.path.join(train_path, "Z.pt"))
         R_train = torch.load(os.path.join(train_path, "R.pt"))
         M_train = torch.load(os.path.join(train_path, "M.pt"))
-        E_train = torch.load(os.path.join(train_path, "E.pt"))
+        E_train = torch.load(os.path.join(train_path, f"{target}.pt"))
         N_val = torch.load(os.path.join(val_path, "N.pt"))
         Z_val = torch.load(os.path.join(val_path, "Z.pt"))
         R_val = torch.load(os.path.join(val_path, "R.pt"))
         M_val = torch.load(os.path.join(val_path, "M.pt"))
-        E_val = torch.load(os.path.join(val_path, "E.pt"))
+        E_val = torch.load(os.path.join(val_path, f"{target}.pt"))
 
         self.train_dataset = GWSetDataset(num_train, N_train, Z_train, R_train, M_train, E_train)
         self.val_dataset = GWSetDataset(num_val, N_val, Z_val, R_val, M_val, E_val)
 
 
-    def _prepare_data(self, num_train, num_val):
+    def _prepare_data(self, data_path, target, num_train, num_val):
         xyz_path = "/Users/dario/datasets/GWSet/QM9/QM9_xyz_files"
         results_path = "/Users/dario/datasets/GWSet/results"
         eqp_path = f"{results_path}/E_qp"
@@ -119,9 +119,9 @@ class GWSet(torch.nn.Module):
         all_R = []
         all_M = []
         all_E = []
-        train_path = os.path.join(self.data_path, "train")
         print("Preparing training data...")
-        os.makedirs(os.path.join(self.data_path, "train"))
+        train_path = os.path.join(data_path, "train")
+        os.makedirs(train_path)
         for i in tqdm(train_idx, leave=False):
             mol = f"mol_{i}"
             atoms = read(f"{xyz_path}/{mol}.xyz", format="xyz")
@@ -152,7 +152,7 @@ class GWSet(torch.nn.Module):
         torch.save(Z_train, os.path.join(train_path, "Z.pt"))
         torch.save(R_train, os.path.join(train_path, "R.pt"))
         torch.save(M_train, os.path.join(train_path, "M.pt"))
-        torch.save(E_train, os.path.join(train_path, "E.pt"))
+        torch.save(E_train, os.path.join(train_path, f"{target}.pt"))
         print("Done.")
 
         all_N = []
@@ -160,9 +160,9 @@ class GWSet(torch.nn.Module):
         all_R = []
         all_M = []
         all_E = []
-        val_path = os.path.join(self.data_path, "val")
         print("Preparing validation data...")
-        os.makedirs(os.path.join(self.data_path, "val"))
+        val_path = os.path.join(data_path, "val")
+        os.makedirs(val_path)
         for i in tqdm(val_idx, leave=False):
             mol = f"mol_{i}"
             atoms = read(f"{xyz_path}/{mol}.xyz", format="xyz")
@@ -193,7 +193,7 @@ class GWSet(torch.nn.Module):
         torch.save(Z_val, os.path.join(val_path, "Z.pt"))
         torch.save(R_val, os.path.join(val_path, "R.pt"))
         torch.save(M_val, os.path.join(val_path, "M.pt"))
-        torch.save(E_val, os.path.join(val_path, "E.pt"))
+        torch.save(E_val, os.path.join(val_path, f"{target}.pt"))
         print("Done.")
 
 

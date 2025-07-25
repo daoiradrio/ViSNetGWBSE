@@ -18,7 +18,8 @@ model:
   transfer_learn: False
 data:
   dataset: gwset
-  data_path: GWSet 
+  data_path: GWSet
+  target: GAP 
   num_train: 117000
   num_val: 10000
 training:
