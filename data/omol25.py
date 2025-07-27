@@ -33,11 +33,11 @@ class OMol25Dataset(Dataset):
             HOMO_memmap = np.memmap(f"{data_path}/{split_set}/HOMO.npy", dtype="float32", mode="r", shape=(num_data,))
             GAP_memmap = np.memmap(f"{data_path}/{split_set}/GAP.npy", dtype="float32", mode="r", shape=(num_data,))
             E_memmap = GAP_memmap + HOMO_memmap
-        self.N = torch.from_numpy(np.asarray(N_memmap).copy())
-        self.Z = torch.from_numpy(np.asarray(Z_memmap).copy())
-        self.R = torch.from_numpy(np.asarray(R_memmap).copy())
-        self.M = torch.from_numpy(np.asarray(M_memmap).copy())
-        self.E = torch.from_numpy(np.asarray(E_memmap).copy())
+        self.N = torch.from_numpy(np.asarray(N_memmap)[:num_samples].copy())
+        self.Z = torch.from_numpy(np.asarray(Z_memmap)[:num_samples].copy())
+        self.R = torch.from_numpy(np.asarray(R_memmap)[:num_samples].copy())
+        self.M = torch.from_numpy(np.asarray(M_memmap)[:num_samples].copy())
+        self.E = torch.from_numpy(np.asarray(E_memmap)[:num_samples].copy())
         del N_memmap
         del Z_memmap
         del R_memmap
