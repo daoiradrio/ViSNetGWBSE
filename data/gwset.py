@@ -141,6 +141,8 @@ class GWSet(torch.nn.Module):
             elif target == "GAP":
                 eqp = np.loadtxt(f"{eqp_path}/{mol}.dat")
                 E = torch.tensor([eqp[homo_idx+1] - eqp[homo_idx]])
+            elif target == "LUMO":
+                E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
             all_N.append(N)
             all_Z.append(Z)
             all_R.append(R)
@@ -181,7 +183,13 @@ class GWSet(torch.nn.Module):
                 pad=(0, 0, 0, QM9_N_MAX - N)
             )
             M = torch.where(Z > 0, True, False)
-            E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+            if target == "HOMO":
+                E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+            elif target == "GAP":
+                eqp = np.loadtxt(f"{eqp_path}/{mol}.dat")
+                E = torch.tensor([eqp[homo_idx+1] - eqp[homo_idx]])
+            elif target == "LUMO":
+                E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
             all_N.append(N)
             all_Z.append(Z)
             all_R.append(R)
