@@ -148,6 +148,7 @@ def main():
         print(f"Epoch {epoch + 1:3d}: {train_mse:10.5f} {train_mae:10.5f} {val_mse:10.5f} {val_mae:10.5f} {optimizer.param_groups[0]['lr']:15.8f}")
         with open(os.path.join(chkpt_dir, "metrics.csv"), "a") as f:
             print(f"{epoch+1},{train_mse:.8f},{train_mae:.8f},{val_mse:.8f},{val_mae:.8f},{optimizer.param_groups[0]['lr']:.8f}", file=f)
+        torch.save(swa_model.state_dict(), os.path.join(chkpt_dir, f"swa_model.ckpt"))
 
 
 
