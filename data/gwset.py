@@ -112,8 +112,11 @@ class GWSet(torch.nn.Module):
                 pass
         print("Done.")
         random.shuffle(idx)
-        train_idx = idx[:num_train]
-        val_idx = idx[num_train:min(len(idx), num_train+num_val)]
+        #train_idx = idx[:num_train]
+        print(num_train)
+        train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
+        #val_idx = idx[num_train:min(len(idx), num_train+num_val)]
+        val_idx = idx[117000:min(len(idx), 117000+num_val)]
 
         all_N = []
         all_Z = []

@@ -19,13 +19,13 @@ model:
 data:
   dataset: gwset
   data_path: GWSet
-  target: DELTAHOMO
-  num_train: 117000
+  target: HOMO
+  num_train: 40000
   num_val: 10000
 training:
   device: cpu
   log_dir: visnet_logs
-  batch_size: 64
+  batch_size: 10
   num_epochs: 55
   num_warmup_epochs: 5
   lr_start: 0.00001

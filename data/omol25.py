@@ -27,7 +27,7 @@ class OMol25Dataset(Dataset):
         Z_memmap = np.memmap(f"{data_path}/{split_set}/Z.npy", dtype="int32", mode="r", shape=(num_data, N_MAX))
         R_memmap = np.memmap(f"{data_path}/{split_set}/R.npy", dtype="float32", mode="r", shape=(num_data, N_MAX, 3))
         M_memmap = np.memmap(f"{data_path}/{split_set}/M.npy", dtype="bool", mode="r", shape=(num_data, N_MAX))
-        if target == "HOMO" or target == "GAP":
+        if target == "HOMO" or target == "GAP" or target == "E":
             E_memmap = np.memmap(f"{data_path}/{split_set}/{target}.npy", dtype="float32", mode="r", shape=(num_data,))
         elif target == "LUMO":
             HOMO_memmap = np.memmap(f"{data_path}/{split_set}/HOMO.npy", dtype="float32", mode="r", shape=(num_data,))
