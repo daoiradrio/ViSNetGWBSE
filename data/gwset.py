@@ -92,6 +92,7 @@ class GWSet(torch.nn.Module):
         xyz_path = "/Users/dario/datasets/GWSet/QM9/QM9_xyz_files"
         results_path = "/Users/dario/datasets/GWSet/results"
         eqp_path = f"{results_path}/E_qp"
+        dft_path = f"{results_path}/E_dft"
         homo_path = f"{results_path}/homo_idx"
 
         #idx = [i for i in range(1, QM9_SIZE + 1)]
@@ -143,6 +144,20 @@ class GWSet(torch.nn.Module):
                 E = torch.tensor([eqp[homo_idx+1] - eqp[homo_idx]])
             elif target == "LUMO":
                 E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+            elif target == "DELTAHOMO":
+                egw = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+                edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]])
+                E = egw - edft
+            elif target == "DELTALUMO":
+                egw = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+                edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]])
+                E = egw - edft
+            elif target == "DELTAGAP":
+                egw_homo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+                edft_homo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]])
+                egw_lumo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+                edft_lumo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]])
+                E = (egw_lumo - egw_homo) - (edft_lumo - edft_homo)
             all_N.append(N)
             all_Z.append(Z)
             all_R.append(R)
@@ -190,6 +205,20 @@ class GWSet(torch.nn.Module):
                 E = torch.tensor([eqp[homo_idx+1] - eqp[homo_idx]])
             elif target == "LUMO":
                 E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+            elif target == "DELTAHOMO":
+                egw = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+                edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]])
+                E = egw - edft
+            elif target == "DELTALUMO":
+                egw = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+                edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]])
+                E = egw - edft
+            elif target == "DELTAGAP":
+                egw_homo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+                edft_homo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]])
+                egw_lumo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+                edft_lumo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]])
+                E = (egw_lumo - egw_homo) - (edft_lumo - edft_homo)
             all_N.append(N)
             all_Z.append(Z)
             all_R.append(R)
