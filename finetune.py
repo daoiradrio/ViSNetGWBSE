@@ -64,10 +64,9 @@ def main():
     print(f"Number of trainable parameters: {num_params}")
     print()
 
-    optimizer = torch.optim.SGD(
-        params=model.parameters(),
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
         lr=cfg.training.lr_max,
-        momentum=0.9,
         weight_decay=cfg.training.weight_decay
     )
     
