@@ -19,8 +19,8 @@ model:
 data:
   dataset: gwset
   data_path: GWSet
-  target: HOMO
-  num_train: 40000
+  target: DELTAHOMO
+  num_train: 117000
   num_val: 10000
 training:
   device: cpu
