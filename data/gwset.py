@@ -113,6 +113,7 @@ class GWSet(torch.nn.Module):
                 pass
         print("Done.")
         random.shuffle(idx)
+        print("Total number of samples: ", len(idx))
         train_idx = idx[:num_train]
         #train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
         val_idx = idx[num_train:min(len(idx), num_train+num_val)]
@@ -210,17 +211,17 @@ class GWSet(torch.nn.Module):
                 E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
             elif target == "DELTAHOMO":
                 egw = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
-                edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]])
+                edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]]) * HARTREE_TO_EV
                 E = egw - edft
             elif target == "DELTALUMO":
                 egw = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
-                edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]])
+                edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]]) * HARTREE_TO_EV
                 E = egw - edft
             elif target == "DELTAGAP":
                 egw_homo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
-                edft_homo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]])
+                edft_homo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]]) * HARTREE_TO_EV
                 egw_lumo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
-                edft_lumo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]])
+                edft_lumo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]]) * HARTREE_TO_EV
                 E = (egw_lumo - egw_homo) - (edft_lumo - edft_homo)
             all_N.append(N)
             all_Z.append(Z)
