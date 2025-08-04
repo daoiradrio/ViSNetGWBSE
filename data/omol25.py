@@ -65,7 +65,7 @@ class OMol25Dataset(Dataset):
 
 class OMol25(torch.nn.Module):
 
-    def __init__(self, num_train, num_val, dataset, data_path, target):
+    def __init__(self, num_train, num_val, num_test, dataset, data_path, target, remove_charged):
         super().__init__()
         self.train_dataset = OMol25Dataset(data_path=data_path, split_set="train", num_samples=num_train, target=target)
         self.val_dataset = OMol25Dataset(data_path=data_path, split_set="val", num_samples=num_val, target=target)

@@ -60,13 +60,15 @@ class GWSet(torch.nn.Module):
         self,
         num_train,
         num_val,
+        num_test,
         dataset,
         data_path,
-        target
+        target,
+        remove_charged
     ):
         super().__init__()
         if not os.path.exists(os.path.join(os.getcwd(), data_path)):
-            self._prepare_data(data_path, target, num_train, num_val)
+            self._prepare_data(data_path, target, num_train, num_val, remove_charged)
         self._read_data(data_path, target, num_train, num_val)
 
 
@@ -89,34 +91,35 @@ class GWSet(torch.nn.Module):
         self.val_dataset = GWSetDataset(num_val, N_val, Z_val, R_val, M_val, E_val)
 
 
-    def _prepare_data(self, data_path, target, num_train, num_val):
+    def _prepare_data(self, data_path, target, num_train, num_val, num_test, remove_charged):
         xyz_path = "/Users/dario/datasets/GWSet/QM9/QM9_xyz_files"
         results_path = "/Users/dario/datasets/GWSet/results"
         eqp_path = f"{results_path}/E_qp"
         dft_path = f"{results_path}/E_dft"
         homo_path = f"{results_path}/homo_idx"
 
-        #idx = [i for i in range(1, QM9_SIZE + 1)]
-        idx = []
         print()
-        print("Checking molecules...")
-        for i in tqdm(range(1, QM9_SIZE + 1), leave=False):
-            try:
-                raw_mol = Chem.MolFromXYZFile(f"{xyz_path}/mol_{i}.xyz")
-                mol = Chem.Mol(raw_mol)
-                rdDetermineBonds.DetermineBonds(mol)
-                for atom in mol.GetAtoms():
-                    if atom.GetFormalCharge() != 0:
-                        continue
-                idx.append(i)
-            except:
-                pass
-        print("Done.")
-        random.shuffle(idx)
-        train_idx = idx[:num_train]
-        #train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
-        val_idx = idx[num_train:min(len(idx), num_train+num_val)]
-        #val_idx = idx[117000:min(len(idx), 117000+num_val)]
+        if remove_charged:
+            idx = []
+            print("Checking molecules...")
+            for i in tqdm(range(1, QM9_SIZE + 1), leave=False):
+                try:
+                    raw_mol = Chem.MolFromXYZFile(f"{xyz_path}/mol_{i}.xyz")
+                    mol = Chem.Mol(raw_mol)
+                    rdDetermineBonds.DetermineBonds(mol)
+                    flag = False
+                    for atom in mol.GetAtoms():
+                        if atom.GetFormalCharge() != 0:
+                            flag = True
+                            break
+                    if not flag:
+                        idx.append(i)
+                except:
+                    pass
+            print("Done.")
+        else:
+            idx = [i for i in range(1, QM9_SIZE + 1)]
+        print(f"{len(idx)} samples in total.")
 
         all_N = []
         all_Z = []
@@ -124,6 +127,11 @@ class GWSet(torch.nn.Module):
         all_M = []
         all_E = []
         print("Preparing training data...")
+        random.shuffle(idx)
+        train_idx = idx[:num_train]
+        #train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
+        val_idx = idx[num_train:min(len(idx), num_train+num_val)]
+        #val_idx = idx[117000:min(len(idx), 117000+num_val)]
         train_path = os.path.join(data_path, "train")
         os.makedirs(train_path)
         for i in tqdm(train_idx, leave=False):

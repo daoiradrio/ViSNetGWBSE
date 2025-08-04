@@ -20,8 +20,10 @@ data:
   dataset: gwset
   data_path: GWSet
   target: HOMO
-  num_train: 10000
+  num_train: 117000
   num_val: 10000
+  num_test: 1
+  remove_charged: False
 training:
   device: cpu
   log_dir: visnet_logs

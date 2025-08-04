@@ -54,6 +54,7 @@ def main():
         model.representation_model.requires_grad_(False)
     
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    swa_model = torch.optim.swa_utils.AveragedModel(model)
     model.to(torch.device(cfg.training.device))
 
     print()
@@ -71,10 +72,15 @@ def main():
         start_factor=cfg.training.lr_start/cfg.training.lr_max,
         total_iters=cfg.training.num_warmup_epochs
     )
-    lr_decay = torch.optim.lr_scheduler.CosineAnnealingLR(
+    lr_warm_cos = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer=optimizer,
-        T_max=cfg.training.num_epochs - cfg.training.num_warmup_epochs,
+        T_0=35,
         eta_min=cfg.training.eta_min
+    )
+    lr_scheduler = torch.optim.lr_scheduler.SequentialLR(
+        optimizer=optimizer,
+        schedulers=[lr_warmup, lr_warm_cos],
+        milestones=[cfg.training.num_warmup_epochs]
     )
 
     mse_fn = torch.nn.MSELoss()
@@ -127,10 +133,9 @@ def main():
                 mse = mse_fn(E_pred, E)
                 val_mse += (mse - val_mse) / (i + 1)
                 val_mae += (mae - val_mae) / (i + 1)
-        if epoch < cfg.training.num_warmup_epochs:
-            lr_warmup.step()
-        else:
-            lr_decay.step()
+        lr_scheduler.step()
+        if epoch > cfg.training.num_warmup_epochs:
+            swa_model.update_parameters(model)
         if val_mae < min_val_mae:
             torch.save(model.state_dict(), os.path.join(chkpt_dir, f"best_model.ckpt"))
             min_val_mae = val_mae
@@ -139,6 +144,7 @@ def main():
         print(f"Epoch {epoch + 1:3d}: {train_mse:10.5f} {train_mae:10.5f} {val_mse:10.5f} {val_mae:10.5f} {optimizer.param_groups[0]['lr']:15.8f}")
         with open(os.path.join(chkpt_dir, "metrics.csv"), "a") as f:
             print(f"{epoch+1},{train_mse:.8f},{train_mae:.8f},{val_mse:.8f},{val_mae:.8f},{optimizer.param_groups[0]['lr']:.8f}", file=f)
+        torch.save(swa_model.state_dict(), os.path.join(chkpt_dir, f"swa_model.ckpt"))
 
 
 

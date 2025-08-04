@@ -59,7 +59,7 @@ class QCMLDataset(Dataset):
 
 class QCML(torch.nn.Module):
 
-    def __init__(self, num_train, num_val, dataset, data_path, target):
+    def __init__(self, num_train, num_val, num_test, dataset, data_path, target, remove_charged):
         super().__init__()
         self.train_dataset = QCMLDataset(data_path=data_path, split_set="train", num_samples=num_train)
         self.val_dataset = QCMLDataset(data_path=data_path, split_set="val", num_samples=num_val)
