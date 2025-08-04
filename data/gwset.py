@@ -113,7 +113,6 @@ class GWSet(torch.nn.Module):
                 pass
         print("Done.")
         random.shuffle(idx)
-        print("Total number of samples: ", len(idx))
         train_idx = idx[:num_train]
         #train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
         val_idx = idx[num_train:min(len(idx), num_train+num_val)]

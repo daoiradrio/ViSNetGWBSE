@@ -24,8 +24,6 @@ def main():
 
     if cfg.data.dataset == "gwset":
         data_module = GWSet(**cfg.data)
-    elif cfg.data.dataset == "omol25":
-        data_module = OMol25(**cfg.data)
     else:
         print("Invalid dataset.")
         return
@@ -77,7 +75,7 @@ def main():
     )
     lr_warm_cos = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer=optimizer,
-        T_0=5,
+        T_0=35,
         eta_min=cfg.training.eta_min
     )
     lr_scheduler = torch.optim.lr_scheduler.SequentialLR(
