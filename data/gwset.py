@@ -68,13 +68,14 @@ class GWSet(torch.nn.Module):
     ):
         super().__init__()
         if not os.path.exists(os.path.join(os.getcwd(), data_path)):
-            self._prepare_data(data_path, target, num_train, num_val, remove_charged)
-        self._read_data(data_path, target, num_train, num_val)
+            self._prepare_data(data_path, target, num_train, num_val, num_test, remove_charged)
+        self._read_data(data_path, target, num_train, num_val, num_test)
 
 
-    def _read_data(self, data_path, target, num_train, num_val):
+    def _read_data(self, data_path, target, num_train, num_val, num_test):
         train_path = os.path.join(data_path, "train")
         val_path = os.path.join(data_path, "val")
+        test_path = os.path.join(data_path, "test")
         
         N_train = torch.load(os.path.join(train_path, "N.pt"))
         Z_train = torch.load(os.path.join(train_path, "Z.pt"))
@@ -86,9 +87,15 @@ class GWSet(torch.nn.Module):
         R_val = torch.load(os.path.join(val_path, "R.pt"))
         M_val = torch.load(os.path.join(val_path, "M.pt"))
         E_val = torch.load(os.path.join(val_path, f"{target}.pt"))
+        N_test = torch.load(os.path.join(test_path, "N.pt"))
+        Z_test = torch.load(os.path.join(test_path, "Z.pt"))
+        R_test = torch.load(os.path.join(test_path, "R.pt"))
+        M_test = torch.load(os.path.join(test_path, "M.pt"))
+        E_test = torch.load(os.path.join(test_path, f"{target}.pt"))
 
         self.train_dataset = GWSetDataset(num_train, N_train, Z_train, R_train, M_train, E_train)
         self.val_dataset = GWSetDataset(num_val, N_val, Z_val, R_val, M_val, E_val)
+        self.test_dataset = GWSetDataset(num_test, N_test, Z_test, R_test, M_test, E_test)
 
 
     def _prepare_data(self, data_path, target, num_train, num_val, num_test, remove_charged):
@@ -121,17 +128,84 @@ class GWSet(torch.nn.Module):
             idx = [i for i in range(1, QM9_SIZE + 1)]
         print(f"{len(idx)} samples in total.")
 
+        random.shuffle(idx)
+        train_idx = idx[:num_train]
+        #train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
+        val_idx = idx[num_train : num_train+num_val]
+        #val_idx = idx[117000:min(len(idx), 117000+num_val)]
+        test_idx = idx[num_train+num_val : num_train+num_val+num_test]
+
+        split_sets = {"train": train_idx, "val": val_idx, "test": test_idx}
+
+        for split_set, split_idx in split_sets.items():
+            all_N = []
+            all_Z = []
+            all_R = []
+            all_M = []
+            all_E = []
+            print(f"Preparing {split_set} data...")
+            split_path = os.path.join(data_path, split_set)
+            os.makedirs(split_path)
+            for i in tqdm(split_idx, leave=False):
+                mol = f"mol_{i}"
+                atoms = read(f"{xyz_path}/{mol}.xyz", format="xyz")
+                homo_idx = np.loadtxt(f"{homo_path}/{mol}.dat", dtype=int)
+                N = torch.tensor([len(atoms)])
+                Z = pad(
+                    torch.from_numpy(atoms.get_atomic_numbers()),
+                    pad=(0, QM9_N_MAX - N)
+                )
+                R = pad(
+                    torch.from_numpy(atoms.get_positions()),
+                    pad=(0, 0, 0, QM9_N_MAX - N)
+                )
+                M = torch.where(Z > 0, True, False)
+                if target == "HOMO":
+                    E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+                elif target == "GAP":
+                    eqp = np.loadtxt(f"{eqp_path}/{mol}.dat")
+                    E = torch.tensor([eqp[homo_idx+1] - eqp[homo_idx]])
+                elif target == "LUMO":
+                    E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+                elif target == "DELTAHOMO":
+                    egw = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+                    edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]]) * HARTREE_TO_EV
+                    E = egw - edft
+                elif target == "DELTALUMO":
+                    egw = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+                    edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]]) * HARTREE_TO_EV
+                    E = egw - edft
+                elif target == "DELTAGAP":
+                    egw_homo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
+                    edft_homo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]]) * HARTREE_TO_EV
+                    egw_lumo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+                    edft_lumo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]]) * HARTREE_TO_EV
+                    E = (egw_lumo - egw_homo) - (edft_lumo - edft_homo)
+                all_N.append(N)
+                all_Z.append(Z)
+                all_R.append(R)
+                all_M.append(M)
+                all_E.append(E)
+            N_train = torch.stack(all_N)
+            Z_train = torch.stack(all_Z)
+            R_train = torch.stack(all_R).to(dtype=torch.float32)
+            M_train = torch.stack(all_M)
+            E_train = torch.stack(all_E).to(dtype=torch.float32)
+            torch.save(torch.tensor([len(train_idx)]), os.path.join(split_path, "num_samples.pt"))
+            torch.save(N_train, os.path.join(split_path, "N.pt"))
+            torch.save(Z_train, os.path.join(split_path, "Z.pt"))
+            torch.save(R_train, os.path.join(split_path, "R.pt"))
+            torch.save(M_train, os.path.join(split_path, "M.pt"))
+            torch.save(E_train, os.path.join(split_path, f"{target}.pt"))
+            print("Done.")
+
+        '''
         all_N = []
         all_Z = []
         all_R = []
         all_M = []
         all_E = []
         print("Preparing training data...")
-        random.shuffle(idx)
-        train_idx = idx[:num_train]
-        #train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
-        val_idx = idx[num_train:min(len(idx), num_train+num_val)]
-        #val_idx = idx[117000:min(len(idx), 117000+num_val)]
         train_path = os.path.join(data_path, "train")
         os.makedirs(train_path)
         for i in tqdm(train_idx, leave=False):
@@ -247,6 +321,7 @@ class GWSet(torch.nn.Module):
         torch.save(M_val, os.path.join(val_path, "M.pt"))
         torch.save(E_val, os.path.join(val_path, f"{target}.pt"))
         print("Done.")
+        '''
 
 
     def collate_fn(self, batch):
