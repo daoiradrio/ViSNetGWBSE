@@ -9,7 +9,7 @@ model:
   trainable_rbf: False
   activation: silu
   attn_activation: silu
-  max_z: 10 # 86 for QCML, 54 for OMol25, 10 for GWSet
+  max_z: 118 # 86 for QCML, 54 for OMol25, 10 for GWSet
   cutoff: 5.0
   num_layers: 3
   max_num_neighbors: 100
@@ -23,13 +23,13 @@ data:
   num_train: 1000
   num_val: 100
   num_test: 100
-  remove_charged: True
+  remove_charged: False
 training:
   device: cpu
   log_dir: visnet_logs
-  batch_size: 10
-  num_epochs: 50
-  num_warmup_epochs: 5
+  batch_size: 8
+  num_epochs: 4
+  num_warmup_epochs: 2
   lr_start: 0.00001
   lr_max: 0.0005
   eta_min: 0.00001

@@ -45,6 +45,15 @@ def main():
         pin_memory=True if cfg.training.device == "cuda" else False,
         collate_fn=data_module.collate_fn
     )
+    test_dataloader = DataLoader(
+        data_module.test_dataset,
+        batch_size=cfg.training.batch_size,
+        shuffle=False,
+        num_workers=4 if cfg.training.device == "cuda" else 0,
+        persistent_workers=True if cfg.training.device == "cuda" else False,
+        pin_memory=True if cfg.training.device == "cuda" else False,
+        collate_fn=data_module.collate_fn
+    )
 
     model = create_model(cfg)
     if cfg.model.load_model:
@@ -139,6 +148,23 @@ def main():
         print(f"Epoch {epoch + 1:3d}: {train_mse:10.5f} {train_mae:10.5f} {val_mse:10.5f} {val_mae:10.5f} {optimizer.param_groups[0]['lr']:15.8f}")
         with open(os.path.join(chkpt_dir, "metrics.csv"), "a") as f:
             print(f"{epoch+1},{train_mse:.8f},{train_mae:.8f},{val_mse:.8f},{val_mae:.8f},{optimizer.param_groups[0]['lr']:.8f}", file=f)
+    
+    num_test_batches = ceil(cfg.data.num_test / cfg.training.batch_size)
+    test_mse = 0
+    test_mae = 0
+    with torch.no_grad():
+        for i, (data, E) in tqdm(enumerate(test_dataloader), total=num_test_batches, leave=False):
+            data["z"] = data["z"].to(torch.device(cfg.training.device))
+            data["pos"] = data["pos"].to(torch.device(cfg.training.device))
+            data["batch"] = data["batch"].to(torch.device(cfg.training.device))
+            E = E.to(torch.device(cfg.training.device))
+            E_pred, _ = model(data)
+            mae = mae_fn(E_pred, E)
+            mse = mse_fn(E_pred, E)
+            test_mse += (mse - test_mse) / (i + 1)
+            test_mae += (mae - test_mae) / (i + 1)
+    print()
+    print(f"Test MSE = {test_mse:10.5f}, Test MAE = {test_mae:10.5f}")  
 
 
 
