@@ -129,11 +129,12 @@ class GWSet(torch.nn.Module):
         print(f"{len(idx)} samples in total.")
 
         random.shuffle(idx)
-        train_idx = idx[:num_train]
-        #train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
-        val_idx = idx[num_train : num_train+num_val]
-        #val_idx = idx[117000:min(len(idx), 117000+num_val)]
-        test_idx = idx[num_train+num_val : num_train+num_val+num_test]
+        #train_idx = idx[:num_train]
+        train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
+        #val_idx = idx[num_train : num_train+num_val]
+        val_idx = idx[117000 : 117000+num_val]
+        #test_idx = idx[num_train+num_val : num_train+num_val+num_test]
+        test_idx = idx[117000+num_val : 117000+num_val+num_test]
 
         split_sets = {"train": train_idx, "val": val_idx, "test": test_idx}
 
@@ -150,6 +151,9 @@ class GWSet(torch.nn.Module):
                 mol = f"mol_{i}"
                 atoms = read(f"{xyz_path}/{mol}.xyz", format="xyz")
                 homo_idx = np.loadtxt(f"{homo_path}/{mol}.dat", dtype=int)
+
+                #print(float(np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]), float(np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]))
+
                 N = torch.tensor([len(atoms)])
                 Z = pad(
                     torch.from_numpy(atoms.get_atomic_numbers()),
@@ -181,6 +185,8 @@ class GWSet(torch.nn.Module):
                     egw_lumo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
                     edft_lumo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]]) * HARTREE_TO_EV
                     E = (egw_lumo - egw_homo) - (edft_lumo - edft_homo)
+                #print(E)
+                #print()
                 all_N.append(N)
                 all_Z.append(Z)
                 all_R.append(R)

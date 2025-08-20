@@ -3,13 +3,13 @@ model:
   vecnorm_type: None
   trainable_vecnorm: False
   num_heads: 4
-  hidden_channels: 96
+  hidden_channels: 128
   num_rbf: 25
   rbf_type: gauss
   trainable_rbf: False
   activation: silu
   attn_activation: silu
-  max_z: 118 # 86 for QCML, 54 for OMol25, 10 for GWSet
+  max_z: 83 # 86 for QCML, 54 for OMol25, 10 for GWSet
   cutoff: 5.0
   num_layers: 3
   max_num_neighbors: 100
@@ -18,11 +18,11 @@ model:
   transfer_learn: False
 data:
   dataset: gwset
-  data_path: GWSet
-  target: HOMO
-  num_train: 1000
-  num_val: 100
-  num_test: 100
+  data_path: /Users/dario/ViSNetGW/GWSet_10000_train
+  target: GAP
+  num_train: 10000
+  num_val: 10000
+  num_test: 2885
   remove_charged: False
 training:
   device: cpu
