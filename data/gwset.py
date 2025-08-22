@@ -13,8 +13,8 @@ from tqdm import tqdm
 
 
 
-random.seed(42)
-np.random.seed(42)
+random.seed(84)
+np.random.seed(84)
 
 
 
@@ -68,6 +68,7 @@ class GWSet(torch.nn.Module):
     ):
         super().__init__()
         if not os.path.exists(os.path.join(os.getcwd(), data_path)):
+        #if True:
             self._prepare_data(data_path, target, num_train, num_val, num_test, remove_charged)
         self._read_data(data_path, target, num_train, num_val, num_test)
 
@@ -151,9 +152,6 @@ class GWSet(torch.nn.Module):
                 mol = f"mol_{i}"
                 atoms = read(f"{xyz_path}/{mol}.xyz", format="xyz")
                 homo_idx = np.loadtxt(f"{homo_path}/{mol}.dat", dtype=int)
-
-                #print(float(np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]), float(np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]))
-
                 N = torch.tensor([len(atoms)])
                 Z = pad(
                     torch.from_numpy(atoms.get_atomic_numbers()),
@@ -171,6 +169,9 @@ class GWSet(torch.nn.Module):
                     E = torch.tensor([eqp[homo_idx+1] - eqp[homo_idx]])
                 elif target == "LUMO":
                     E = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
+                    #HOMO = torch.load(os.path.join(split_path, "HOMO.pt"))[i]
+                    #GAP = torch.load(os.path.join(split_path, "GAP.pt"))[i]
+                    #E = GAP + HOMO
                 elif target == "DELTAHOMO":
                     egw = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx]])
                     edft = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx]]) * HARTREE_TO_EV
@@ -185,8 +186,6 @@ class GWSet(torch.nn.Module):
                     egw_lumo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
                     edft_lumo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]]) * HARTREE_TO_EV
                     E = (egw_lumo - egw_homo) - (edft_lumo - edft_homo)
-                #print(E)
-                #print()
                 all_N.append(N)
                 all_Z.append(Z)
                 all_R.append(R)

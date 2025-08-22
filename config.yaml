@@ -18,9 +18,9 @@ model:
   transfer_learn: False
 data:
   dataset: gwset
-  data_path: /Users/dario/ViSNetGW/GWSet_10000_train
+  data_path: /Users/dario/ViSNetGW/GWSet_80000_train_seed_84
   target: GAP
-  num_train: 10000
+  num_train: 80000
   num_val: 10000
   num_test: 2885
   remove_charged: False

@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 
 
-torch.manual_seed(42)
+torch.manual_seed(84)
 
 
 
