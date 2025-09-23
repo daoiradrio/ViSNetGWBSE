@@ -13,8 +13,8 @@ from tqdm import tqdm
 
 
 
-random.seed(84)
-np.random.seed(84)
+random.seed(42)
+np.random.seed(42)
 
 
 
@@ -67,8 +67,8 @@ class GWSet(torch.nn.Module):
         remove_charged
     ):
         super().__init__()
-        if not os.path.exists(os.path.join(os.getcwd(), data_path)):
-        #if True:
+        #if not os.path.exists(os.path.join(os.getcwd(), data_path)):
+        if not os.path.exists(data_path):
             self._prepare_data(data_path, target, num_train, num_val, num_test, remove_charged)
         self._read_data(data_path, target, num_train, num_val, num_test)
 
@@ -105,6 +105,7 @@ class GWSet(torch.nn.Module):
         eqp_path = f"{results_path}/E_qp"
         dft_path = f"{results_path}/E_dft"
         homo_path = f"{results_path}/homo_idx"
+        exc_ss_path = f"{results_path}/E_exc_SS"
 
         print()
         if remove_charged:
@@ -130,12 +131,12 @@ class GWSet(torch.nn.Module):
         print(f"{len(idx)} samples in total.")
 
         random.shuffle(idx)
-        #train_idx = idx[:num_train]
-        train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
-        #val_idx = idx[num_train : num_train+num_val]
-        val_idx = idx[117000 : 117000+num_val]
-        #test_idx = idx[num_train+num_val : num_train+num_val+num_test]
-        test_idx = idx[117000+num_val : 117000+num_val+num_test]
+        train_idx = idx[:num_train]
+        #train_idx = list(np.random.choice(idx[:117000], size=num_train, replace=False))
+        val_idx = idx[num_train : num_train+num_val]
+        #val_idx = idx[117000 : 117000+num_val]
+        test_idx = idx[num_train+num_val : num_train+num_val+num_test]
+        #test_idx = idx[117000+num_val : 117000+num_val+num_test]
 
         split_sets = {"train": train_idx, "val": val_idx, "test": test_idx}
 
@@ -186,22 +187,24 @@ class GWSet(torch.nn.Module):
                     egw_lumo = torch.tensor([np.loadtxt(f"{eqp_path}/{mol}.dat")[homo_idx+1]])
                     edft_lumo = torch.tensor([np.loadtxt(f"{dft_path}/{mol}.dat")[homo_idx+1]]) * HARTREE_TO_EV
                     E = (egw_lumo - egw_homo) - (edft_lumo - edft_homo)
+                elif target == "EXC_SS":
+                    E = torch.tensor([np.loadtxt(f"{exc_ss_path}/{mol}.dat")[0] * HARTREE_TO_EV])
                 all_N.append(N)
                 all_Z.append(Z)
                 all_R.append(R)
                 all_M.append(M)
                 all_E.append(E)
-            N_train = torch.stack(all_N)
-            Z_train = torch.stack(all_Z)
-            R_train = torch.stack(all_R).to(dtype=torch.float32)
-            M_train = torch.stack(all_M)
-            E_train = torch.stack(all_E).to(dtype=torch.float32)
-            torch.save(torch.tensor([len(train_idx)]), os.path.join(split_path, "num_samples.pt"))
-            torch.save(N_train, os.path.join(split_path, "N.pt"))
-            torch.save(Z_train, os.path.join(split_path, "Z.pt"))
-            torch.save(R_train, os.path.join(split_path, "R.pt"))
-            torch.save(M_train, os.path.join(split_path, "M.pt"))
-            torch.save(E_train, os.path.join(split_path, f"{target}.pt"))
+            N = torch.stack(all_N)
+            Z = torch.stack(all_Z)
+            R = torch.stack(all_R).to(dtype=torch.float32)
+            M = torch.stack(all_M)
+            E = torch.stack(all_E).to(dtype=torch.float32)
+            torch.save(torch.tensor([len(split_idx)]), os.path.join(split_path, "num_samples.pt"))
+            torch.save(N, os.path.join(split_path, "N.pt"))
+            torch.save(Z, os.path.join(split_path, "Z.pt"))
+            torch.save(R, os.path.join(split_path, "R.pt"))
+            torch.save(M, os.path.join(split_path, "M.pt"))
+            torch.save(E, os.path.join(split_path, f"{target}.pt"))
             print("Done.")
 
         '''

@@ -114,7 +114,8 @@ class ViSNet(nn.Module):
         out = scatter(x, data['batch'], dim=0, reduce=self.reduce_op)
         out = self.output_model.post_reduce(out)
 
-        out = out + self.mean
+        #out = out + self.mean
+        out = out - 5.1074
 
         # compute gradients with respect to coordinates
         if self.derivative:
