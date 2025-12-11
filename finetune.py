@@ -7,14 +7,14 @@ import shutil
 
 from omegaconf import OmegaConf
 from ViSNetGW.model.visnet import create_model
-from ViSNetGW.data.gwset import GWSet
+from ViSNetGW.data.qm9gwbse import QM9GWBSE
 from torch.utils.data import DataLoader
 from math import ceil
 from tqdm import tqdm
 
 
 
-torch.manual_seed(84)
+torch.manual_seed(42)
 
 
 
@@ -22,7 +22,7 @@ def main():
     cfg = OmegaConf.load(os.path.join(os.getcwd(), "config.yaml"))
 
     if cfg.data.dataset == "gwset":
-        data_module = GWSet(**cfg.data)
+        data_module = QM9GWBSE(**cfg.data)
     else:
         print("Invalid dataset.")
         return

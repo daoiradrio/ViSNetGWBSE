@@ -8,7 +8,6 @@ import shutil
 from omegaconf import OmegaConf
 from ViSNetGW.model.visnet import create_model
 from ViSNetGW.data.omol25 import OMol25
-from ViSNetGW.data.qcml import QCML
 from ViSNetGW.data.qcdge import QCDGE
 from torch.utils.data import DataLoader
 from math import ceil
@@ -25,8 +24,6 @@ def main():
 
     if cfg.data.dataset == "omol25":
         data_module = OMol25(**cfg.data)
-    elif cfg.data.dataset == "qcml":
-        data_module = QCML(**cfg.data)
     elif cfg.data.dataset == "qcdge":
         data_module = QCDGE(**cfg.data)
     else:

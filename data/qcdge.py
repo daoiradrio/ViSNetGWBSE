@@ -148,7 +148,7 @@ class QCDGE(torch.nn.Module):
                 torch.save(E, os.path.join(split_path, "E.pt"))
                 print("Done.")
         print()
-    
+
 
     def collate_fn(self, batch):
         curr_batch_size = len(batch)
@@ -162,4 +162,3 @@ class QCDGE(torch.nn.Module):
             repeats=N
         )
         return {"z": Z, "pos": R, "batch": B}, E
-                    

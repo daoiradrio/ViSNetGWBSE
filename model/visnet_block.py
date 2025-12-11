@@ -1,3 +1,5 @@
+# Code taken from https://github.com/microsoft/AI2BMD/tree/main/src/ViSNet/model
+
 from typing import Optional, Tuple
 
 import torch

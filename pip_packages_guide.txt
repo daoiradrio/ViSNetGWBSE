@@ -3,9 +3,10 @@ conda activate visnet
 pip install --index-url https://download.pytorch.org/whl/cu121 torch==2.2.2+cu121 torchvision==0.17.2+cu121
 pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
 pip install torch-cluster  -f https://data.pyg.org/whl/torch-2.2.0+cu121.html
-pip install torch-geometric omegaconf ase h5py
+pip install torch-geometric omegaconf ase h5py pandas rdkit
 pip install "numpy<2.0"
-pip install rdkit
+
+pip install --index-url https://download.pytorch.org/whl/cu121 torch==2.2.2+cu121; pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.0+cu121.html; pip install torch-cluster  -f https://data.pyg.org/whl/torch-2.2.0+cu121.html; pip install torch-geometric omegaconf ase h5py pandas rdkit; pip install "numpy<2.0"
 
 module purge
 source /sw/arch/RHEL9/EB_production/2024/software/Miniconda3/24.7.1-0/etc/profile.d/conda.sh

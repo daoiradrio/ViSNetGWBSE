@@ -1,8 +1,9 @@
+# Code taken from https://github.com/microsoft/AI2BMD/tree/main/src/ViSNet/model
+
 from abc import ABCMeta, abstractmethod
 
 import torch
 import torch.nn as nn
-from pytorch_lightning.utilities import rank_zero_warn
 
 
 

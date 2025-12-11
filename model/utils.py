@@ -1,3 +1,5 @@
+# Code taken from https://github.com/microsoft/AI2BMD/tree/main/src/ViSNet/model
+
 import math
 
 import torch
@@ -5,7 +7,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_cluster import radius_graph
 from torch_geometric.nn import MessagePassing
-#from torch_sparse import SparseTensor
 
 
 

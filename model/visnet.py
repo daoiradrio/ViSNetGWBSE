@@ -1,8 +1,9 @@
+# Code taken from https://github.com/microsoft/AI2BMD/tree/main/src/ViSNet/model
+
 from typing import List, Optional, Tuple
 
 import torch
 import torch.nn as nn
-#from pytorch_lightning.utilities import rank_zero_warn
 from torch import Tensor
 from torch.autograd import grad
 from torch_scatter import scatter
@@ -44,31 +45,6 @@ def create_model(cfg, prior_model=None, mean=None, std=None):
     )
 
     return model
-
-
-'''
-def load_model(filepath, args=None, device="cpu", **kwargs):
-    ckpt = torch.load(filepath, map_location="cpu")
-    if args is None:
-        args = ckpt["hyper_parameters"]
-
-    for key, value in kwargs.items():
-        if key not in args:
-            rank_zero_warn(f"Unknown hyperparameter: {key}={value}")
-        args[key] = value
-
-    model = create_model(args)
-    state_dict = {
-        re.sub(r"^model\.", "", k): v for k, v in ckpt["state_dict"].items()
-    }
-    model.load_state_dict(state_dict)
-
-    for p in model.parameters():
-        p.requires_grad=False
-
-    model = torch.jit.script(model)
-    return model.to(device)
-'''
 
 
 
@@ -114,10 +90,8 @@ class ViSNet(nn.Module):
         out = scatter(x, data['batch'], dim=0, reduce=self.reduce_op)
         out = self.output_model.post_reduce(out)
 
-        #out = out + self.mean
-        out = out - 5.1074
+        out = out + self.mean
 
-        # compute gradients with respect to coordinates
         if self.derivative:
             grad_outputs: List[Optional[torch.Tensor]] = [torch.ones_like(out)]
             dy = grad(
