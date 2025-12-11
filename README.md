@@ -1,6 +1,6 @@
 # Transfer learning of GW-BSE excitation energies and qsGW quasiparticle energies
 
-Repository to the paper "Transfer learning of GW Bethe-Salpeter Equation excitation energies" (LINK). We show how DFT and TDDFT data can be leveraged to 1) reduce test errors of GNN-based predictions of qsGW quasiparticle energies and GW-BSE excitation energies and 2) reduce the required amount of costly qsGW and GW-BSE needed for doing so.
+Repository to the paper "Transfer learning of GW Bethe-Salpeter Equation excitation energies" (LINK). We show how DFT and TDDFT data can be leveraged to 1) reduce test errors of GNN-based predictions of qsGW quasiparticle energies and GW-BSE excitation energies and 2) reduce the required amount of costly qsGW and GW-BSE data needed for doing so.
 
 The filenames of model checkpoints of pretrained models in the `checkpoints/` directory follow the pattern:
 
