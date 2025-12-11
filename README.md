@@ -6,7 +6,7 @@ The filenames of model checkpoints of pretrained models in the `checkpoints/` di
 
 pre-`prop`-<code>n<sub>pre</sub></code>-M-<code>n<sub>feat</sub></code>-<code>r<sub>cut</sub></code>-<code>n<sub>bas</sub></code>-<code>n<sub>mp</sub></code>-<code>l<sub>max</sub></code>
 
-For instance, `prehomo1M128502532` denotes a model pretrained on 1,000,000 (`1M`) HOMO energies (`prop`) with 128 feature channels (<code>n<sub>feat</sub></code>), using a cutoff distance of 5.0 Å (<code>r<sub>cut</sub></code>), 25 radial basis functions (<code>n<sub>bas</sub></code>), 3 message-passing layers (<code>n<sub>mp</sub></code>) and <code>l<sub>max</sub></code> of 2. The filenames of pretrained and finetuned models follow the pattern:
+For instance, `prehomo1M128502532` denotes a model pretrained on 1,000,000 (`1M`) HOMO energies (`prop`) with 128 feature channels (<code>n<sub>feat</sub></code>), using a cutoff distance of 5.0 Å (<code>r<sub>cut</sub></code> with the decimal point left out in the filenames), 25 radial basis functions (<code>n<sub>bas</sub></code>), 3 message-passing layers (<code>n<sub>mp</sub></code>) and <code>l<sub>max</sub></code> of 2. The filenames of pretrained and finetuned models follow the pattern:
 
 `prop`-<code>n<sub>pre</sub></code>-M-<code>n<sub>feat</sub></code>-<code>r<sub>cut</sub></code>-<code>n<sub>bas</sub></code>-<code>n<sub>mp</sub></code>-<code>l<sub>max</sub></code>
 
