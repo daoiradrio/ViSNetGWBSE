@@ -13,3 +13,5 @@ For instance, `prehomo1M128502532` denotes a model pretrained on 1,000,000 (`1M`
 For instance, `homo1M128502532` denotes a model pretrained and finetuned on HOMO energies. The filenames of the baseline models without pretraining, so 0 pretraining samples, and only finetuning follow the pattern:
 
 `prop`-0M-<code>n<sub>feat</sub></code>-<code>r<sub>cut</sub></code>-<code>n<sub>bas</sub></code>-<code>n<sub>mp</sub></code>-<code>l<sub>max</sub></code>
+
+The ViSNet model used in this work was taken from the official repository `github.com/microsoft/AI2BMD`
